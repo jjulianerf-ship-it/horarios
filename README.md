@@ -1,9 +1,7 @@
-<!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Horario y Trabajos por Hacer</title>
+
+   
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -213,6 +211,7 @@
 </head>
 <body>
     <header>
+
         <h1>Horario y Trabajos por Hacer</h1>
     </header>
 
@@ -294,6 +293,18 @@
             <button id="next-month">Mes Siguiente »</button>
         </div>
         <div class="calendar" id="calendar"></div>
+
+
+<div class="links-section">
+    <h2>Enlaces Útiles</h2>
+    <ul>
+        <li><a href="https://floorplanner.com/projects/160842477/editor" target="_blank">Enlace 1 futura virtual carpeta</a></li>
+        <li><a href="https://www.example.com" target="_blank">Enlace 2 trabajos</a></li>
+        <li><a href="https://www.example.com" target="_blank">Enlace 3 apps y programas</a></li>
+        <li><a href="https://www.youtube.com/watch?v=wO1cIvij6PA" target="_blank">importante NO tocar</a></li>
+    </ul>
+</div>
+
 
         <div class="mode-toggle">
             <button id="toggle-mode">Modo Oscuro</button>
