@@ -1,7 +1,8 @@
 <html lang="es">
 <head>
-
-   
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horario y Trabajos por Hacer</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -78,7 +79,7 @@
             text-decoration: line-through;
             color: gray;
         }
-        .form-section {
+        .form-section, .links-section {
             margin-top: 20px;
             padding: 10px;
             background-color: #e9ecef;
@@ -163,7 +164,7 @@
         .dark-mode .calendar td.date {
             background-color: #666;
         }
-        .dark-mode .form-section {
+        .dark-mode .form-section, .dark-mode .links-section {
             background-color: #6c757d;
         }
         .dark-mode button {
@@ -211,7 +212,6 @@
 </head>
 <body>
     <header>
-
         <h1>Horario y Trabajos por Hacer</h1>
     </header>
 
@@ -221,11 +221,11 @@
             <thead>
                 <tr>
                     <th>Inicio</th>
-                    <th>  Lunes</th>
-                    <th>  Martes</th>
-                    <th>  Miércoles</th>
-                    <th>  Jueves</th>
-                    <th>  Viernes</th>
+                    <th>Lunes</th>
+                    <th>Martes</th>
+                    <th>Miércoles</th>
+                    <th>Jueves</th>
+                    <th>Viernes</th>
                 </tr>
             </thead>
             <tbody>
@@ -260,40 +260,74 @@
                     <td class="blue">ECONOMÍA<br>(Ventañú)</td>
                     <td class="yellow">ORGANIZACIÓN INDUSTRIAL<br>(Viale)</td>
                     <td class="yellow">ORGANIZACIÓN INDUSTRIAL<br>(Viale)</td>
+             
                 </tr>
             </tbody>
         </table>
 
-        <h2>Trabajos por Hacer</h2>
-        <div class="trabajos" id="trabajos-list">
-            <!-- Los trabajos se agregarán aquí dinámicamente -->
+        <div id="trabajos" class="trabajos">
+            <h2>Trabajos por Hacer</h2>
+            <!-- Aquí se mostrarán los trabajos -->
         </div>
 
         <div class="form-section">
-            <h2>Agregar Trabajo</h2>
-            <form id="trabajo-form">
-                <label for="materia">Materia:</label>
-                <select id="materia" name="materia" required>
+            <h3>Agregar Trabajo</h3>
+            <label for="materia">Materia:</label>
+            <select id="materia">
+                <option value="">Selecciona una materia</option>
+                <!-- Las materias se insertarán aquí -->
                     <option value="Estadísticas y Diseño de Experimentos">Estadísticas y Diseño de Experimentos</option>
                     <option value="Economía">Economía</option>
                     <option value="Organización Industrial">Organización Industrial</option>
                     <option value="Práctica Profesionalizante I: Organización de la Producción">Práctica Profesionalizante I: Organización de la Producción</option>
-                </select>
-                <label for="descripcion">Descripción:</label>
-                <input type="text" id="descripcion" name="descripcion" required>
-                <label for="fecha">Fecha de entrega:</label>
-                <input type="date" id="fecha" name="fecha" required>
-                <button type="submit">Agregar</button>
-            </form>
+            </select>
+            <label for="descripcion">Descripción:</label>
+            <input type="text" id="descripcion">
+            <label for="fecha">Fecha de Entrega:</label>
+            <input type="date" id="fecha">
+            <button onclick="agregarTrabajo()">Agregar Trabajo</button>
         </div>
 
-        <h2>Calendario</h2>
-        <div class="calendar-controls">
-            <button id="prev-month">« Mes Anterior</button>
-            <button id="next-month">Mes Siguiente »</button>
+        <div class="links-section">
+            <h3>Enlaces Relacionados</h3>
+            <ul id="links">
+                <!-- Los enlaces se mostrarán aquí -->
+            </ul>
+            <label for="link-titulo">Título del Enlace:</label>
+            <input type="text" id="link-titulo">
+            <label for="link-url">URL del Enlace:</label>
+            <input type="text" id="link-url">
+            <button onclick="agregarLink()">Agregar Enlace</button>
         </div>
-        <div class="calendar" id="calendar"></div>
 
+        <div class="calendar">
+            <h3>Calendario</h3>
+            <div class="calendar-controls">
+                <button onclick="cambiarMes(-1)">Anterior</button>
+                <button onclick="cambiarMes(1)">Siguiente</button>
+            </div>
+            <table>
+                <thead>
+                    <tr id="calendario-header">
+
+                        <!-- Los días de la semana se insertarán aquí -->
+                    </tr>
+                </thead>
+                <tbody id="calendario-body">
+                    <!-- Los días del mes se insertarán aquí -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="notification">
+            Novedades de la versión 1.0.2
+Ahora, si recargas o entras mediante el link, no se borran los trabajos.
+También tenemos un apartado nuevo donde puedes agregar tus propios links de las páginas que más usas.
+
+ADVERTENCIA: Solo se guarda en el dispositivo desde el que entraste.
+
+
+        </div>
 
 <div class="links-section">
     <h2>Enlaces Útiles</h2>
@@ -305,151 +339,204 @@
     </ul>
 </div>
 
-
         <div class="mode-toggle">
-            <button id="toggle-mode">Modo Oscuro</button>
+            <button onclick="toggleDarkMode()">Activar Modo Oscuro</button>
         </div>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const calendar = document.getElementById('calendar');
-            const prevMonthButton = document.getElementById('prev-month');
-            const nextMonthButton = document.getElementById('next-month');
-            const toggleModeButton = document.getElementById('toggle-mode');
-            const body = document.body;
-            const trabajosList = document.getElementById('trabajos-list');
+        const trabajos = document.getElementById('trabajos');
+        const materiasSelect = document.getElementById('materia');
+        const linksList = document.getElementById('links');
 
-            let currentMonth = new Date().getMonth();
-            let currentYear = new Date().getFullYear();
-
-            function renderCalendar(month, year) {
-                const firstDay = new Date(year, month).getDay();
-                const lastDate = new Date(year, month + 1, 0).getDate();
-                const calendarHeader = `<table>
-                    <thead>
-                        <tr>
-                            <th>Dom</th>
-                            <th>Lun</th>
-                            <th>Mar</th>
-                            <th>Mié</th>
-                            <th>Jue</th>
-                            <th>Vie</th>
-                            <th>Sáb</th>
-                        </tr>
-                    </thead>
-                    <tbody><tr>`;
-
-                let calendarBody = calendarHeader;
-                for (let i = 0; i < firstDay; i++) {
-                    calendarBody += `<td></td>`;
-                }
-
-                for (let day = 1; day <= lastDate; day++) {
-                    if ((firstDay + day - 1) % 7 === 0 && day !== 1) {
-                        calendarBody += `</tr><tr>`;
-                    }
-                    let className = 'date';
-                    if (new Date().getDate() === day && new Date().getMonth() === month && new Date().getFullYear() === year) {
-                        className += ' today';
-                    }
-                    calendarBody += `<td class="${className}">${day}</td>`;
-                }
-
-                while ((firstDay + lastDate) % 7 !== 0) {
-                    calendarBody += `<td></td>`;
-                    lastDate++;
-                }
-
-                calendarBody += `</tr></tbody></table>`;
-                calendar.innerHTML = calendarBody;
-            }
-
-            function toggleMode() {
-                body.classList.toggle('dark-mode');
-                toggleModeButton.textContent = body.classList.contains('dark-mode') ? 'Modo Claro' : 'Modo Oscuro';
-            }
-
-            prevMonthButton.addEventListener('click', function() {
-                if (currentMonth === 0) {
-                    currentMonth = 11;
-                    currentYear--;
-                } else {
-                    currentMonth--;
-                }
-                renderCalendar(currentMonth, currentYear);
-            });
-
-            nextMonthButton.addEventListener('click', function() {
-                if (currentMonth === 11) {
-                    currentMonth = 0;
-                    currentYear++;
-                } else {
-                    currentMonth++;
-                }
-                renderCalendar(currentMonth, currentYear);
-            });
-
-            toggleModeButton.addEventListener('click', toggleMode);
-
-            renderCalendar(currentMonth, currentYear);
-
-            document.getElementById('trabajo-form').addEventListener('submit', function(e) {
-                e.preventDefault();
-                const materia = document.getElementById('materia').value;
-                const descripcion = document.getElementById('descripcion').value;
-                const fecha = document.getElementById('fecha').value;
-
-                const trabajoDiv = document.createElement('div');
-                trabajoDiv.className = 'trabajo';
-                trabajoDiv.innerHTML = `
-                    <div class="materia">${materia}</div>
-                    <ul>
-                        <li>
-                            <input type="checkbox" class="checkbox" />
-                            <span class="descripcion">${descripcion}</span>
-                            - <span class="fecha">${fecha}</span>
-                        </li>
-                    </ul>
-                    <div class="edit-buttons">
-                        <button class="edit-button">Editar</button>
-                        <button class="remove-button">Eliminar</button>
+        function cargarTrabajos() {
+            const trabajosGuardados = JSON.parse(localStorage.getItem('trabajos')) || [];
+            trabajos.innerHTML = '';
+            trabajosGuardados.forEach((trabajo, index) => {
+                trabajos.innerHTML += `
+                    <div class="trabajo ${trabajo.completado ? 'completed' : ''}">
+                        <div class="materia">${trabajo.materia}</div>
+                        <div>${trabajo.descripcion}</div>
+                        <div>${trabajo.fecha}</div>
+                        <div class="edit-buttons">
+                            <button onclick="editarTrabajo(${index})">Editar</button>
+                            <button class="remove-button" onclick="eliminarTrabajo(${index})">Eliminar</button>
+                            <button onclick="marcarCompleto(${index})">${trabajo.completado ? 'Marcar Incompleto' : 'Marcar Completo'}</button>
+                        </div>
+                        <div id="edit-task-${index}" class="edit-task">
+                            <label for="edit-descripcion-${index}">Descripción:</label>
+                            <input type="text" id="edit-descripcion-${index}" value="${trabajo.descripcion}">
+                            <label for="edit-fecha-${index}">Fecha de Entrega:</label>
+                            <input type="date" id="edit-fecha-${index}" value="${trabajo.fecha}">
+                            <button onclick="guardarEdicion(${index})">Guardar</button>
+                        </div>
                     </div>
                 `;
-                trabajosList.appendChild(trabajoDiv);
-                document.getElementById('trabajo-form').reset();
-
-                // Agregar eventos de edición y eliminación
-                trabajoDiv.querySelector('.remove-button').addEventListener('click', function() {
-                    trabajosList.removeChild(trabajoDiv);
-                });
-
-                trabajoDiv.querySelector('.edit-button').addEventListener('click', function() {
-                    const descripcionSpan = trabajoDiv.querySelector('.descripcion');
-                    const fechaSpan = trabajoDiv.querySelector('.fecha');
-                    const checkbox = trabajoDiv.querySelector('.checkbox');
-
-                    const newDescripcion = prompt("Ingrese la nueva descripción:", descripcionSpan.textContent);
-                    const newFecha = prompt("Ingrese la nueva fecha de entrega:", fechaSpan.textContent);
-
-                    if (newDescripcion !== null) {
-                        descripcionSpan.textContent = newDescripcion;
-                    }
-                    if (newFecha !== null) {
-                        fechaSpan.textContent = newFecha;
-                    }
-                    checkbox.checked = false; // Resetear el checkbox
-                });
-
-                trabajoDiv.querySelector('.checkbox').addEventListener('change', function() {
-                    const isChecked = this.checked;
-                    if (isChecked) {
-                        trabajoDiv.querySelector('.descripcion').classList.add('completed');
-                    } else {
-                        trabajoDiv.querySelector('.descripcion').classList.remove('completed');
-                    }
-                });
             });
+        }
+
+        function agregarTrabajo() {
+            const materia = document.getElementById('materia').value;
+            const descripcion = document.getElementById('descripcion').value;
+            const fecha = document.getElementById('fecha').value;
+
+            if (materia && descripcion && fecha) {
+                const trabajosGuardados = JSON.parse(localStorage.getItem('trabajos')) || [];
+                trabajosGuardados.push({ materia, descripcion, fecha, completado: false });
+                localStorage.setItem('trabajos', JSON.stringify(trabajosGuardados));
+                cargarTrabajos();
+                document.getElementById('materia').value = '';
+                document.getElementById('descripcion').value = '';
+                document.getElementById('fecha').value = '';
+            } else {
+                alert('Por favor, completa todos los campos.');
+            }
+        }
+
+        function eliminarTrabajo(index) {
+            const trabajosGuardados = JSON.parse(localStorage.getItem('trabajos')) || [];
+            trabajosGuardados.splice(index, 1);
+            localStorage.setItem('trabajos', JSON.stringify(trabajosGuardados));
+            cargarTrabajos();
+        }
+
+        function editarTrabajo(index) {
+            const editTaskDiv = document.getElementById(`edit-task-${index}`);
+            if (editTaskDiv.style.display === 'none' || editTaskDiv.style.display === '') {
+                editTaskDiv.style.display = 'block';
+            } else {
+                editTaskDiv.style.display = 'none';
+            }
+        }
+
+        function guardarEdicion(index) {
+            const descripcion = document.getElementById(`edit-descripcion-${index}`).value;
+            const fecha = document.getElementById(`edit-fecha-${index}`).value;
+
+            if (descripcion && fecha) {
+                const trabajosGuardados = JSON.parse(localStorage.getItem('trabajos')) || [];
+                trabajosGuardados[index] = { ...trabajosGuardados[index], descripcion, fecha };
+                localStorage.setItem('trabajos', JSON.stringify(trabajosGuardados));
+                cargarTrabajos();
+            } else {
+                alert('Por favor, completa todos los campos.');
+            }
+        }
+
+        function marcarCompleto(index) {
+            const trabajosGuardados = JSON.parse(localStorage.getItem('trabajos')) || [];
+            trabajosGuardados[index].completado = !trabajosGuardados[index].completado;
+            localStorage.setItem('trabajos', JSON.stringify(trabajosGuardados));
+            cargarTrabajos();
+        }
+
+        function agregarLink() {
+            const linkTitulo = document.getElementById('link-titulo').value;
+            const linkUrl = document.getElementById('link-url').value;
+
+            if (linkTitulo && linkUrl) {
+                const linksGuardados = JSON.parse(localStorage.getItem('links')) || [];
+                linksGuardados.push({ titulo: linkTitulo, url: linkUrl });
+                localStorage.setItem('links', JSON.stringify(linksGuardados));
+                cargarLinks();
+                document.getElementById('link-titulo').value = '';
+                document.getElementById('link-url').value = '';
+            } else {
+                alert('Por favor, completa todos los campos.');
+            }
+        }
+
+        function cargarLinks() {
+            const linksGuardados = JSON.parse(localStorage.getItem('links')) || [];
+            linksList.innerHTML = '';
+            linksGuardados.forEach(link => {
+                linksList.innerHTML += `
+                    <li>
+                        <a href="${link.url}" target="_blank">${link.titulo}</a>
+                    </li>
+                `;
+            });
+        }
+
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const button = document.querySelector('.mode-toggle button');
+            button.textContent = document.body.classList.contains('dark-mode') ? 'Desactivar Modo Oscuro' : 'Activar Modo Oscuro';
+        }
+
+        // Funciones del calendario
+        let mesActual = new Date().getMonth();
+        let anoActual = new Date().getFullYear();
+
+        function cargarCalendario() {
+            const header = document.getElementById('calendario-header');
+            const body = document.getElementById('calendario-body');
+
+            // Días de la semana
+            header.innerHTML = `
+                <th>Dom</th>
+                <th>Lun</th>
+                <th>Mar</th>
+                <th>Mié</th>
+                <th>Jue</th>
+                <th>Vie</th>
+                <th>Sab</th>
+            `;
+
+            // Primer día del mes
+            const primerDia = new Date(anoActual, mesActual, 1).getDay();
+            const diasEnMes = new Date(anoActual, mesActual + 1, 0).getDate();
+
+            let filas = '';
+            let dia = 1;
+
+            // Vaciar el calendario
+            body.innerHTML = '';
+
+            // Espacios en blanco antes del primer día
+            let fila = '<tr>';
+            for (let i = 0; i < primerDia; i++) {
+                fila += '<td></td>';
+            }
+
+            // Días del mes
+            for (let i = primerDia; dia <= diasEnMes; i++) {
+                fila += `<td>${dia}</td>`;
+                dia++;
+                if (i % 7 === 6) {
+                    fila += '</tr>';
+                    body.innerHTML += fila;
+                    fila = '<tr>';
+                }
+            }
+
+            // Rellenar el último renglón
+            if (fila !== '<tr>') {
+                while (dia % 7 !== 1) {
+                    fila += '<td></td>';
+                    dia++;
+                }
+                fila += '</tr>';
+                body.innerHTML += fila;
+            }
+        }
+
+        function cambiarMes(mes) {
+            mesActual += mes;
+            if (mesActual < 0) {
+                mesActual = 11;
+                anoActual--;
+            } else if (mesActual > 11) {
+                mesActual = 0;
+                anoActual++;
+            }
+            cargarCalendario();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            cargarTrabajos();
+            cargarLinks();
+            cargarCalendario();
         });
     </script>
 </body>
